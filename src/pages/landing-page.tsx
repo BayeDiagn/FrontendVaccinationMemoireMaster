@@ -13,191 +13,72 @@ import {
   Activity,
   MapPin,
   Clock,
-  Star
+  Star,
+  Baby,
+  Syringe,
+  FileText,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 import { AppLogo } from "@/utils/common";
 
-const MotherChildIllustration = () => (
-  <svg viewBox="0 0 440 380" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-    {/* Glowing background circles */}
-    <circle cx="190" cy="195" r="170" fill="white" fillOpacity="0.04"/>
-    <circle cx="170" cy="200" r="110" fill="white" fillOpacity="0.03"/>
-
-    {/* === MOTHER FIGURE === */}
-    {/* Hair back layer */}
-    <ellipse cx="148" cy="70" rx="44" ry="30" fill="#93c5fd" fillOpacity="0.92"/>
-    <ellipse cx="112" cy="98" rx="18" ry="35" fill="#93c5fd" fillOpacity="0.88"/>
-    <ellipse cx="184" cy="98" rx="18" ry="35" fill="#93c5fd" fillOpacity="0.88"/>
-    {/* Head */}
-    <circle cx="148" cy="100" r="40" fill="white" fillOpacity="0.94"/>
-    {/* Hair front */}
-    <ellipse cx="148" cy="74" rx="40" ry="22" fill="#bfdbfe" fillOpacity="0.82"/>
-    {/* Eyes */}
-    <ellipse cx="136" cy="96" rx="4.5" ry="5" fill="#1e3a8a"/>
-    <ellipse cx="160" cy="96" rx="4.5" ry="5" fill="#1e3a8a"/>
-    <circle cx="137.8" cy="94.2" r="1.6" fill="white"/>
-    <circle cx="161.8" cy="94.2" r="1.6" fill="white"/>
-    {/* Eyebrows */}
-    <path d="M 130 87 Q 136 84 143 87" stroke="#1e3a8a" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-    <path d="M 153 87 Q 160 84 167 87" stroke="#1e3a8a" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-    {/* Nose */}
-    <path d="M 148 103 Q 144 110 148 112 Q 152 110 148 103" stroke="#93c5fd" strokeWidth="1.5" fill="none"/>
-    {/* Warm smile */}
-    <path d="M 136 115 Q 148 126 160 115" stroke="#1e3a8a" strokeWidth="3" fill="none" strokeLinecap="round"/>
-    {/* Cheek blush */}
-    <ellipse cx="125" cy="112" rx="8" ry="5" fill="#fca5a5" fillOpacity="0.35"/>
-    <ellipse cx="171" cy="112" rx="8" ry="5" fill="#fca5a5" fillOpacity="0.35"/>
-    {/* Neck */}
-    <rect x="139" y="138" width="18" height="14" rx="6" fill="white" fillOpacity="0.88"/>
-    {/* Body — nurse/doctor coat */}
-    <path d="M 106 152 L 95 270 L 201 270 L 190 152 Z" fill="white" fillOpacity="0.88"/>
-    {/* Coat collar */}
-    <path d="M 126 152 L 148 182 L 170 152" fill="#dbeafe" fillOpacity="0.65"/>
-    <path d="M 126 152 L 148 182 L 170 152" stroke="#93c5fd" strokeWidth="1.5" fill="none"/>
-    {/* Coat buttons */}
-    <circle cx="148" cy="210" r="3.5" fill="#93c5fd" fillOpacity="0.8"/>
-    <circle cx="148" cy="230" r="3.5" fill="#93c5fd" fillOpacity="0.8"/>
-    <circle cx="148" cy="250" r="3.5" fill="#93c5fd" fillOpacity="0.8"/>
-    {/* Medical cross on coat pocket */}
-    <rect x="114" y="182" width="22" height="8" rx="3" fill="#3b82f6" fillOpacity="0.78"/>
-    <rect x="121" y="175" width="8" height="22" rx="3" fill="#3b82f6" fillOpacity="0.78"/>
-    {/* Stethoscope */}
-    <path d="M 138 158 Q 126 180 130 192 Q 135 200 148 198" stroke="#93c5fd" strokeWidth="3.5" fill="none" strokeLinecap="round"/>
-    <circle cx="148" cy="198" r="7" stroke="#60a5fa" strokeWidth="2.5" fill="white" fillOpacity="0.55"/>
-
-    {/* Left arm (wrapping around child protectively) */}
-    <path d="M 95 180 Q 58 215 62 260 Q 68 276 98 270" stroke="white" strokeWidth="28" fill="none" strokeLinecap="round" strokeOpacity="0.84"/>
-    {/* Right arm (reaching gently toward child) */}
-    <path d="M 190 178 Q 222 172 246 182" stroke="white" strokeWidth="26" fill="none" strokeLinecap="round" strokeOpacity="0.84"/>
-
-    {/* === CHILD FIGURE (smaller) === */}
-    {/* Child hair */}
-    <ellipse cx="276" cy="161" rx="33" ry="23" fill="#dbeafe" fillOpacity="0.97"/>
-    <ellipse cx="253" cy="178" rx="13" ry="22" fill="#dbeafe" fillOpacity="0.88"/>
-    <ellipse cx="299" cy="178" rx="13" ry="20" fill="#dbeafe" fillOpacity="0.88"/>
-    {/* Child head */}
-    <circle cx="276" cy="182" r="31" fill="white" fillOpacity="0.94"/>
-    {/* Child hair front */}
-    <ellipse cx="276" cy="162" rx="31" ry="17" fill="#eff6ff" fillOpacity="0.78"/>
-    {/* Child eyes */}
-    <ellipse cx="266" cy="180" rx="4" ry="4.5" fill="#1e3a8a"/>
-    <ellipse cx="286" cy="180" rx="4" ry="4.5" fill="#1e3a8a"/>
-    <circle cx="267.5" cy="178.5" r="1.4" fill="white"/>
-    <circle cx="287.5" cy="178.5" r="1.4" fill="white"/>
-    {/* Child smile */}
-    <path d="M 264 193 Q 276 203 288 193" stroke="#1e3a8a" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
-    {/* Child cheeks */}
-    <ellipse cx="256" cy="190" rx="7" ry="4.5" fill="#fca5a5" fillOpacity="0.35"/>
-    <ellipse cx="296" cy="190" rx="7" ry="4.5" fill="#fca5a5" fillOpacity="0.35"/>
-    {/* Child body */}
-    <path d="M 252 213 L 244 296 L 308 296 L 300 213 Z" fill="white" fillOpacity="0.8"/>
-    {/* Shirt stripe detail */}
-    <rect x="248" y="228" width="60" height="9" rx="2.5" fill="#dbeafe" fillOpacity="0.72"/>
-    {/* Child right arm extended (for injection) */}
-    <path d="M 300 228 Q 328 222 346 228" stroke="white" strokeWidth="22" fill="none" strokeLinecap="round" strokeOpacity="0.84"/>
-    {/* Bandage at injection site */}
-    <rect x="337" y="220" width="20" height="14" rx="4" fill="#fef9c3" fillOpacity="0.92"/>
-    <line x1="337" y1="227" x2="357" y2="227" stroke="#fde68a" strokeWidth="1.5" strokeDasharray="3,2"/>
-
-    {/* === SYRINGE === */}
-    {/* Needle */}
-    <line x1="360" y1="227" x2="380" y2="227" stroke="#bfdbfe" strokeWidth="2.5" strokeLinecap="round"/>
-    <line x1="357" y1="224" x2="360" y2="230" stroke="#bfdbfe" strokeWidth="1.5" strokeLinecap="round"/>
-    {/* Barrel */}
-    <rect x="380" y="220" width="55" height="14" rx="7" fill="#93c5fd" fillOpacity="0.96"/>
-    {/* Liquid inside */}
-    <rect x="381" y="221" width="42" height="12" rx="6" fill="#dbeafe" fillOpacity="0.55"/>
-    {/* Barrel markings */}
-    <line x1="396" y1="220" x2="396" y2="234" stroke="#60a5fa" strokeWidth="2" strokeOpacity="0.6"/>
-    <line x1="409" y1="220" x2="409" y2="234" stroke="#60a5fa" strokeWidth="2" strokeOpacity="0.6"/>
-    <line x1="422" y1="220" x2="422" y2="234" stroke="#60a5fa" strokeWidth="2" strokeOpacity="0.6"/>
-    {/* Plunger handle */}
-    <rect x="433" y="216" width="8" height="22" rx="3" fill="#3b82f6" fillOpacity="0.92"/>
-
-    {/* === DECORATIVE ELEMENTS === */}
-    {/* Large heart left */}
-    <path d="M 34 162 C 34 154 28 145 19 145 C 10 145 4 154 4 162 C 4 177 34 194 34 194 C 34 194 64 177 64 162 C 64 154 58 145 49 145 C 40 145 34 154 34 162Z" fill="white" fillOpacity="0.2"/>
-    {/* Small heart top right */}
-    <path d="M 356 54 C 356 48 352 42 346 42 C 340 42 336 48 336 54 C 336 65 356 76 356 76 C 356 76 376 65 376 54 C 376 48 372 42 366 42 C 360 42 356 48 356 54Z" fill="white" fillOpacity="0.3"/>
-    {/* Tiny heart bottom left */}
-    <path d="M 72 315 C 72 311 69 307 65 307 C 61 307 58 311 58 315 C 58 323 72 330 72 330 C 72 330 86 323 86 315 C 86 311 83 307 79 307 C 75 307 72 311 72 315Z" fill="white" fillOpacity="0.22"/>
-    {/* Shield with check (top left) */}
-    <path d="M 38 34 Q 38 72 63 86 Q 88 72 88 34 L 63 25 Z" fill="white" fillOpacity="0.18"/>
-    <path d="M 48 57 L 60 70 L 80 46" stroke="white" strokeWidth="4.5" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeOpacity="0.72"/>
-    {/* Medical cross bottom right */}
-    <rect x="372" y="312" width="44" height="14" rx="5" fill="white" fillOpacity="0.18"/>
-    <rect x="386" y="298" width="16" height="42" rx="5" fill="white" fillOpacity="0.18"/>
-    {/* Sparkles top */}
-    <circle cx="206" cy="26" r="6" fill="white" fillOpacity="0.48"/>
-    <circle cx="224" cy="16" r="3.5" fill="white" fillOpacity="0.32"/>
-    <circle cx="190" cy="20" r="4" fill="white" fillOpacity="0.3"/>
-    <circle cx="216" cy="40" r="2.2" fill="white" fillOpacity="0.22"/>
-    {/* Sparkles right side */}
-    <circle cx="400" cy="138" r="4.5" fill="white" fillOpacity="0.25"/>
-    <circle cx="415" cy="128" r="2.8" fill="white" fillOpacity="0.2"/>
-    {/* Sparkles bottom left */}
-    <circle cx="16" cy="280" r="4" fill="white" fillOpacity="0.2"/>
-    <circle cx="30" cy="266" r="2.5" fill="white" fillOpacity="0.15"/>
-    {/* Plus symbols */}
-    <text x="390" y="92" fill="white" fillOpacity="0.3" fontSize="22" fontWeight="bold" fontFamily="sans-serif">+</text>
-    <text x="16" y="145" fill="white" fillOpacity="0.2" fontSize="18" fontWeight="bold" fontFamily="sans-serif">+</text>
-    <text x="112" y="336" fill="white" fillOpacity="0.18" fontSize="16" fontWeight="bold" fontFamily="sans-serif">+</text>
-  </svg>
-);
-
 export default function LandingPage() {
   const features = [
     {
-      icon: Heart,
-      title: "Gestion des Vaccinations",
-      description: "Suivi complet des campagnes de vaccination avec calendrier personnalisé et rappels automatiques.",
+      icon: Baby,
+      title: "Suivi des Enfants",
+      description: "Carnet de santé numérique pour chaque enfant avec son calendrier vaccinal complet et les rappels automatiques.",
       color: "text-rose-500",
       bg: "bg-rose-50 dark:bg-rose-950/30"
     },
     {
-      icon: Users,
-      title: "Gestion des Patients",
-      description: "Dossiers médicaux sécurisés, historique des vaccinations et suivi personnalisé pour chaque patient.",
+      icon: Calendar,
+      title: "Gestion des Rendez-vous",
+      description: "Planification intelligente des séances de vaccination, gestion des créneaux et suivi des présences.",
       color: "text-blue-500",
       bg: "bg-blue-50 dark:bg-blue-950/30"
     },
     {
-      icon: Shield,
-      title: "Sécurité Maximale",
-      description: "Protection des données de santé conforme RGPD avec authentification multi-facteurs.",
+      icon: Syringe,
+      title: "Catalogue des Vaccins",
+      description: "Gestion du stock vaccinal, suivi des dates d'expiration et alertes de rupture de stock.",
       color: "text-emerald-500",
       bg: "bg-emerald-50 dark:bg-emerald-950/30"
     },
     {
       icon: BarChart3,
-      title: "Analyses & Rapports",
-      description: "Tableaux de bord interactifs et rapports détaillés pour optimiser vos campagnes de vaccination.",
+      title: "Statistiques & Rapports",
+      description: "Tableaux de bord interactifs, taux de couverture vaccinale et rapports par district sanitaire.",
       color: "text-violet-500",
       bg: "bg-violet-50 dark:bg-violet-950/30"
     },
     {
-      icon: Calendar,
-      title: "Planification Intelligente",
-      description: "Calendrier automatisé des rappels et optimisation des créneaux de vaccination.",
+      icon: Users,
+      title: "Gestion Multi-rôles",
+      description: "Médecins, infirmiers, ICP et sages-femmes : chaque professionnel accède à son espace dédié.",
       color: "text-orange-500",
       bg: "bg-orange-50 dark:bg-orange-950/30"
     },
     {
-      icon: MapPin,
-      title: "Multi-centres",
-      description: "Gestion centralisée de plusieurs centres de vaccination avec synchronisation en temps réel.",
+      icon: FileText,
+      title: "Prédiction par IA",
+      description: "Assistance intelligente pour la prédiction des risques et le choix des vaccins recommandés.",
       color: "text-cyan-500",
       bg: "bg-cyan-50 dark:bg-cyan-950/30"
     }
   ];
 
   const stats = [
-    { number: "50 000+", label: "Patients suivis", icon: Users },
-    { number: "200+", label: "Centres partenaires", icon: MapPin },
-    { number: "99.9%", label: "Disponibilité", icon: Activity },
-    { number: "24/7", label: "Support médical", icon: Clock }
+    { number: "10 000+", label: "Enfants suivis", icon: Baby },
+    { number: "50+",     label: "Postes de santé", icon: MapPin },
+    { number: "99.9%",   label: "Disponibilité", icon: Activity },
+    { number: "24/7",    label: "Accès plateforme", icon: Clock }
+  ];
+
+  const pilliers = [
+    { icon: "🛡️", title: "Protéger nos enfants", desc: "Un suivi vaccinal rigoureux pour chaque enfant dès la naissance" },
+    { icon: "💉", title: "Prévenir les maladies", desc: "Réduire la mortalité infantile grâce à une vaccination complète et à temps" },
+    { icon: "🌍", title: "Construire un avenir sain", desc: "Un Sénégal en bonne santé, district sanitaire par district sanitaire" },
   ];
 
   return (
@@ -270,62 +151,68 @@ export default function LandingPage() {
       </header>
 
       {/* ─────────────────── HERO ─────────────────── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 dark:from-blue-900 dark:via-blue-950 dark:to-slate-950">
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-72 sm:w-[500px] h-72 sm:h-[500px] bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-64 sm:w-96 h-64 sm:h-96 bg-blue-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
+      <section className="relative w-full overflow-hidden" style={{ minHeight: '92vh' }}>
+        {/* Photo plein écran en fond */}
+        <img
+          src="/hero-vaccination.png"
+          alt="Séance de vaccination dans un poste de santé au Sénégal"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* Overlay sombre dégradé pour lisibilité */}
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/60 to-blue-900/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-950/70 via-transparent to-transparent" />
 
-        <div className="container mx-auto px-4 lg:px-6 py-14 sm:py-20 lg:py-32 relative">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-8 items-center">
+        {/* Contenu centré sur la gauche */}
+        <div className="relative h-full container mx-auto px-4 lg:px-6 flex items-center" style={{ minHeight: '92vh' }}>
+          <div className="max-w-2xl space-y-6 sm:space-y-8 py-20">
 
-            {/* Left — text */}
-            <div className="space-y-6 sm:space-y-8">
-              <div className="space-y-5">
-                <Badge className="w-fit bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur">
-                  <Stethoscope className="mr-2 h-3 w-3" />
-                  <span className="text-xs sm:text-sm">Solution Médicale Professionnelle</span>
-                </Badge>
+            <Badge className="w-fit bg-white/20 hover:bg-white/30 text-white border-white/30 backdrop-blur">
+              <Stethoscope className="mr-2 h-3 w-3" />
+              <span className="text-xs sm:text-sm">Plateforme Médicale — Sénégal</span>
+            </Badge>
 
-                <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white leading-tight">
-                  Révolutionnez la
-                  <span className="block text-blue-200">Gestion Vaccinale</span>
-                </h1>
-
-                <p className="text-base sm:text-lg text-blue-100 max-w-2xl leading-relaxed">
-                  Plateforme complète pour les professionnels de santé. Gérez vos campagnes de vaccination
-                  avec efficacité, sécurité et simplicité.
-                </p>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <Button
-                  size="lg"
-                  className="bg-white text-blue-700 hover:bg-blue-50 text-sm sm:text-base font-semibold px-6 sm:px-8 shadow-lg shadow-blue-900/30 w-full sm:w-auto"
-                  asChild
-                >
-                  <Link to="/login">
-                    Accéder à la plateforme <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 pt-4 border-t border-white/20">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center space-y-1 sm:space-y-2">
-                    <stat.icon className="h-5 w-5 sm:h-6 sm:w-6 text-blue-200 mx-auto" />
-                    <div className="text-lg sm:text-2xl font-bold text-white">{stat.number}</div>
-                    <div className="text-xs sm:text-sm text-blue-200">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
+            <div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight drop-shadow-lg">
+                Vaccinons aujourd'hui…
+              </h1>
+              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-blue-200 leading-tight mt-2 drop-shadow">
+                pour un Sénégal en bonne santé
+              </h2>
             </div>
 
-            {/* Right — Illustration maman + enfant */}
-            <div className="relative mt-4 lg:mt-0 flex items-center justify-center">
-              <div className="absolute inset-8 bg-white/8 rounded-full blur-3xl pointer-events-none" />
-              <div className="relative w-full max-w-sm sm:max-w-md lg:max-w-full">
-                <MotherChildIllustration />
-              </div>
+            <p className="text-base sm:text-lg text-blue-100 max-w-lg leading-relaxed">
+              VacciMed digitalise la gestion de la vaccination dans les postes de santé sénégalais.
+              Suivi des enfants, carnets vaccinaux, rendez-vous, stocks et rapports — tout en un.
+            </p>
+
+            {/* Trois piliers */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {pilliers.map((p, i) => (
+                <div key={i} className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 text-center hover:bg-white/20 transition-all">
+                  <div className="text-2xl mb-2">{p.icon}</div>
+                  <p className="text-white font-bold text-sm leading-tight">{p.title}</p>
+                  <p className="text-blue-200 text-xs mt-1 leading-snug hidden sm:block">{p.desc}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 font-bold px-8 shadow-xl w-full sm:w-auto text-base" asChild>
+                <Link to="/login">
+                  Accéder à la plateforme <ArrowRight className="ml-2 h-5 w-5" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/20">
+              {stats.map((stat, i) => (
+                <div key={i} className="text-center space-y-1">
+                  <stat.icon className="h-5 w-5 text-blue-200 mx-auto" />
+                  <div className="text-xl sm:text-2xl font-black text-white">{stat.number}</div>
+                  <div className="text-xs text-blue-200">{stat.label}</div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -384,11 +271,11 @@ export default function LandingPage() {
         <div className="relative container mx-auto px-6 py-14 sm:py-20 text-center">
           <div className="max-w-3xl mx-auto space-y-6 sm:space-y-8">
             <h2 className="text-2xl sm:text-3xl lg:text-5xl font-bold text-white px-2 sm:px-0">
-              Prêt à transformer votre
-              <span className="block text-blue-200">pratique médicale ?</span>
+              Rejoignez les postes de santé
+              <span className="block text-blue-200">qui font confiance à VacciMed</span>
             </h2>
             <p className="text-base sm:text-lg text-blue-100 px-2 sm:px-0">
-              Rejoignez les milliers de professionnels de santé qui font confiance à VacciMed.
+              Digitalisez votre poste de santé, protégez chaque enfant et contribuez à un Sénégal en bonne santé.
             </p>
             <Button size="lg" className="bg-white text-blue-700 hover:bg-blue-50 font-semibold text-base sm:text-lg px-8 shadow-lg shadow-blue-900/30" asChild>
               <Link to="/login">
@@ -396,7 +283,7 @@ export default function LandingPage() {
               </Link>
             </Button>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-blue-200">
-              {["Essai gratuit 30 jours", "Support 24/7", "Sécurité certifiée"].map((t) => (
+              {["Adapté au PEV Sénégal", "Multi-rôles (ICP, Infirmier, SF)", "Données 100% sécurisées"].map((t) => (
                 <div key={t} className="flex items-center gap-2">
                   <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-blue-300" />
                   {t}
@@ -426,31 +313,31 @@ export default function LandingPage() {
 
           <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             <div className="space-y-4 sm:space-y-6">
-              <h3 className="text-xl sm:text-2xl font-bold text-foreground">Une expertise médicale reconnue</h3>
+              <h3 className="text-xl sm:text-2xl font-bold text-foreground">Conçu pour le système de santé sénégalais</h3>
               <div className="space-y-3 sm:space-y-4 text-muted-foreground text-sm sm:text-base leading-relaxed">
                 <p>
-                  Notre équipe réunit des professionnels de santé, des ingénieurs logiciels
-                  et des experts en cybersécurité pour créer la plateforme de vaccination
-                  la plus avancée du marché.
+                  VacciMed a été développé en réponse aux défis concrets des postes de santé
+                  au Sénégal : carnets papier perdus, difficultés de suivi, ruptures de stock
+                  et manque de visibilité sur la couverture vaccinale.
                 </p>
                 <p>
-                  Nous travaillons en étroite collaboration avec les centres hospitaliers,
-                  les cliniques et les centres de vaccination pour comprendre leurs besoins
-                  réels et développer des solutions adaptées.
+                  La plateforme s'adresse aux médecins, infirmiers chefs de poste (ICP),
+                  infirmiers et sages-femmes qui travaillent quotidiennement à la vaccination
+                  des nourrissons et des enfants.
                 </p>
                 <p>
-                  Notre engagement : faciliter le travail des professionnels de santé
-                  tout en garantissant la sécurité et la confidentialité des données patients.
+                  Notre objectif : zéro enfant oublié, chaque vaccin administré au bon moment,
+                  dans les meilleures conditions.
                 </p>
               </div>
               <div className="grid grid-cols-2 gap-4 sm:gap-6 pt-4 sm:pt-6">
                 <div className="text-center bg-primary/5 rounded-xl p-5 border border-primary/10">
-                  <div className="text-2xl sm:text-3xl font-bold text-primary">5+</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Années d'expérience</div>
+                  <div className="text-2xl sm:text-3xl font-bold text-primary">PEV</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Programme Élargi de Vaccination</div>
                 </div>
                 <div className="text-center bg-primary/5 rounded-xl p-5 border border-primary/10">
                   <div className="text-2xl sm:text-3xl font-bold text-primary">100%</div>
-                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Sécurité certifiée</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">Données sécurisées</div>
                 </div>
               </div>
             </div>
@@ -459,14 +346,15 @@ export default function LandingPage() {
               <div className="bg-gradient-to-br from-primary to-blue-700 p-5 sm:p-6">
                 <CardTitle className="flex items-center gap-2 text-lg sm:text-xl text-white">
                   <Shield className="h-5 w-5 text-blue-200" />
-                  Nos valeurs
+                  Ce que VacciMed offre
                 </CardTitle>
               </div>
               <CardContent className="space-y-5 p-5 sm:p-6">
                 {[
-                  { title: "Sécurité avant tout", desc: "Protection maximale des données de santé" },
-                  { title: "Innovation continue", desc: "Technologies de pointe au service de la santé" },
-                  { title: "Accompagnement personnalisé", desc: "Support dédié pour chaque professionnel" },
+                  { title: "Carnet vaccinal numérique", desc: "Chaque enfant dispose d'un dossier complet et accessible" },
+                  { title: "Alertes & rappels automatiques", desc: "Ne manquez plus aucun rendez-vous vaccinal" },
+                  { title: "Rapports par district sanitaire", desc: "Suivi de la couverture vaccinale en temps réel" },
+                  { title: "Prédiction par intelligence artificielle", desc: "Aide à la décision pour le choix des vaccins recommandés" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-3">
                     <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -610,7 +498,7 @@ export default function LandingPage() {
               </div>
               <div>
                 <div className="font-bold text-white text-base sm:text-lg">VacciMed</div>
-                <div className="text-xs sm:text-sm text-slate-400">© 2025 — Tous droits réservés</div>
+                <div className="text-xs sm:text-sm text-slate-400">Vaccination Médicalisée — Sénégal © 2025</div>
               </div>
             </div>
             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-slate-400">

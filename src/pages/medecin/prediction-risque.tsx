@@ -671,9 +671,9 @@ const PredictionRisquePage: React.FC = () => {
             <Activity className="h-8 w-8 text-white" />
           </div>
           <div className="text-white">
-            <h1 className="text-4xl font-black drop-shadow-lg">Analyse du risque de retard ou d'abandon vaccinal</h1>
+            <h1 className="text-4xl font-black drop-shadow-lg">Analyse du risque d'abandon vaccinal</h1>
             <p className="text-blue-100 text-lg font-medium drop-shadow mt-2">
-              Prédiction intelligente du niveau de risque de retard ou d'abandon vaccinal par parent
+              Prédiction intelligente du niveau de risque d'abandon vaccinal par parent
             </p>
           </div>
           <Button 
@@ -779,7 +779,7 @@ const PredictionRisquePage: React.FC = () => {
                 </h3>
                 <p className="text-slate-400 text-center max-w-md">
                   Choisissez un parent dans la liste à gauche pour lancer l'analyse
-                  du risque de retard ou d'abandon vaccinal par intelligence artificielle.
+                  du risque d'abandon vaccinal par intelligence artificielle.
                 </p>
                 <div className="mt-6 flex items-center gap-3 w-full max-w-xs">
                   <div className="h-px flex-1 bg-slate-200" />

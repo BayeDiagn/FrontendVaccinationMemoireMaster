@@ -2,7 +2,6 @@ import { useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
@@ -31,27 +30,6 @@ import { useDecodedToken } from '@/contexts/decoded-token-context';
 import type { VaccinationDTO, EnfantDTO } from '@/types';
 import { StatutVaccination, type StatutVaccinationEnum } from '@/types';
 
-// Configuration des statuts
-const statutConfig: Record<StatutVaccinationEnum, { label: string; color: string; bgColor: string; icon: typeof CheckCircle2 }> = {
-  EFFECTUER: { 
-    label: 'Effecté', 
-    color: 'text-green-700 dark:text-green-300', 
-    bgColor: 'bg-green-100 dark:bg-green-900/50 border-green-200 dark:border-green-800',
-    icon: CheckCircle2 
-  },
-  EN_ATTENTE: { 
-    label: 'En attente', 
-    color: 'text-orange-700 dark:text-orange-300', 
-    bgColor: 'bg-orange-100 dark:bg-orange-900/50 border-orange-200 dark:border-orange-800',
-    icon: Clock 
-  },
-  NON_EFFECTUER: { 
-    label: 'Non effectué', 
-    color: 'text-red-700 dark:text-red-300', 
-    bgColor: 'bg-red-100 dark:bg-red-900/50 border-red-200 dark:border-red-800',
-    icon: XCircle 
-  }
-};
 
 export default function Vaccination() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -168,36 +146,36 @@ export default function Vaccination() {
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/20 dark:to-green-800/20 border-green-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-green-600">Effectués</p>
-                <p className="text-2xl font-bold text-green-700">{stats.effectue}</p>
+                <p className="text-sm text-blue-600">Effectués</p>
+                <p className="text-2xl font-bold text-blue-700">{stats.effectue}</p>
               </div>
-              <CheckCircle2 className="h-8 w-8 text-green-500" />
+              <CheckCircle2 className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/20 border-orange-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-orange-600">En attente</p>
-                <p className="text-2xl font-bold text-orange-700">{stats.enAttente}</p>
+                <p className="text-sm text-blue-600">En attente</p>
+                <p className="text-2xl font-bold text-blue-700">{stats.enAttente}</p>
               </div>
-              <Clock className="h-8 w-8 text-orange-500" />
+              <Clock className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-800/20 border-red-200">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-blue-200">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-red-600">Non effectués</p>
-                <p className="text-2xl font-bold text-red-700">{stats.nonEffectue}</p>
+                <p className="text-sm text-blue-600">Non effectués</p>
+                <p className="text-2xl font-bold text-blue-700">{stats.nonEffectue}</p>
               </div>
-              <XCircle className="h-8 w-8 text-red-500" />
+              <XCircle className="h-8 w-8 text-blue-500" />
             </div>
           </CardContent>
         </Card>
@@ -275,59 +253,29 @@ export default function Vaccination() {
                 </div>
               </div>
               
-              <CardContent className="p-6 space-y-5">
-                {/* Stats Bar */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-gradient-to-br from-green-50 to-green-100/50 dark:from-green-950/30 dark:to-green-900/30 rounded-lg p-4 border border-green-100 dark:border-green-800">
-                    <p className="text-2xl font-bold text-green-600">
-                      {childVaccinations.filter(r => r.statutVaccination === StatutVaccination.EFFECTUER).length}
-                    </p>
-                    <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mt-1">Effectuées</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/30 rounded-lg p-4 border border-orange-100 dark:border-orange-800">
-                    <p className="text-2xl font-bold text-orange-600">
-                      {childVaccinations.filter(r => r.statutVaccination === StatutVaccination.EN_ATTENTE).length}
-                    </p>
-                    <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide mt-1">En attente</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-red-50 to-red-100/50 dark:from-red-950/30 dark:to-red-900/30 rounded-lg p-4 border border-red-100 dark:border-red-800">
-                    <p className="text-2xl font-bold text-red-600">
-                      {childVaccinations.filter(r => r.statutVaccination === StatutVaccination.NON_EFFECTUER).length}
-                    </p>
-                    <p className="text-xs font-semibold text-red-700 uppercase tracking-wide mt-1">Non effectuées</p>
-                  </div>
-                </div>
-
-                {/* Separator */}
-                <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
-
+              <CardContent className="p-6 space-y-4">
                 {/* Preview vaccinations */}
                 {childVaccinations.length > 0 ? (
                   <div className="space-y-3">
-                    <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Dernières vaccinations</p>
+                    <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Dernière vaccination</p>
                     <div className="space-y-2">
-                      {childVaccinations.slice(0, 2).map((vacc) => (
-                        <div key={vacc.id} className="flex items-start justify-between gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{vacc.vaccine?.nom}</p>
-                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              {vacc.date && new Date(vacc.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
-                            </p>
-                          </div>
-                          <Badge className={`${statutConfig[vacc.statutVaccination as StatutVaccinationEnum].bgColor} ${statutConfig[vacc.statutVaccination as StatutVaccinationEnum].color} border text-xs`}>
-                            {statutConfig[vacc.statutVaccination as StatutVaccinationEnum].label}
-                          </Badge>
+                      {childVaccinations.slice(0, 1).map((vacc) => (
+                        <div key={vacc.id} className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                          <p className="font-semibold text-gray-900 dark:text-white text-sm">{vacc.vaccine?.nom}</p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                            {vacc.date && new Date(vacc.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })}
+                          </p>
                         </div>
                       ))}
                     </div>
-                    {childVaccinations.length > 2 && (
-                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium pt-1">
-                        +{childVaccinations.length - 2} autres
+                    {childVaccinations.length > 1 && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                        +{childVaccinations.length - 1} autres
                       </p>
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-4">
+                  <div className="text-center py-2">
                     <p className="text-sm text-muted-foreground">Aucune vaccination pour le moment</p>
                   </div>
                 )}

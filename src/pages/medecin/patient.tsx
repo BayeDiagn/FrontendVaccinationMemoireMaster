@@ -726,11 +726,12 @@ const PatientPage: React.FC = () => {
   const filteredParents = useMemo(() => {
     return parents.filter(parent => {
       // Filtre recherche
-      const searchMatch = 
+      const searchMatch =
         parent.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         parent.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         parent.telephone?.includes(searchTerm) ||
-        parent.email?.toLowerCase().includes(searchTerm.toLowerCase());
+        parent.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        parent.langueMaternelle?.toLowerCase().includes(searchTerm.toLowerCase()); // ★ AJOUTÉ : recherche par langue maternelle
       
       // Filtre statut
       const statutMatch = filterStatut === 'all' || parent.statutMatrimonial === filterStatut;
@@ -1111,31 +1112,31 @@ const PatientPage: React.FC = () => {
             </CardContent>
           </Card>
 
-          <Card className="group relative bg-gradient-to-br from-pink-50 to-white dark:from-pink-950/30 dark:to-slate-900 border-pink-200 dark:border-pink-800 hover:shadow-xl transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="group relative bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-slate-900 border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-bold text-pink-700 dark:text-pink-400 uppercase tracking-widest">Total Enfants</CardTitle>
-              <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
-                <Baby className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+              <CardTitle className="text-sm font-bold text-blue-700 dark:text-blue-400 uppercase tracking-widest">Total Enfants</CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Baby className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-4xl font-black text-pink-700 dark:text-pink-300">{stats.totalEnfants}</div>
-              <p className="text-xs text-pink-600/70 dark:text-pink-400/70 mt-2 font-medium">Enfants enregistrés</p>
+              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{stats.totalEnfants}</div>
+              <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-2 font-medium">Enfants enregistrés</p>
             </CardContent>
           </Card>
 
-          <Card className="group relative bg-gradient-to-br from-green-50 to-white dark:from-green-950/30 dark:to-slate-900 border-green-200 dark:border-green-800 hover:shadow-xl transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-green-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="group relative bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-slate-900 border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-bold text-green-700 dark:text-green-400 uppercase tracking-widest">Moyenne Enfants</CardTitle>
-              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                <Heart className="h-5 w-5 text-green-600 dark:text-green-400" />
+              <CardTitle className="text-sm font-bold text-blue-700 dark:text-blue-400 uppercase tracking-widest">Moyenne Enfants</CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Heart className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-4xl font-black text-green-700 dark:text-green-300">{stats.avgEnfantsPerParent}</div>
-              <p className="text-xs text-green-600/70 dark:text-green-400/70 mt-2 font-medium">Par parent</p>
+              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{stats.avgEnfantsPerParent}</div>
+              <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-2 font-medium">Par parent</p>
             </CardContent>
           </Card>
         </div>
@@ -1148,7 +1149,7 @@ const PatientPage: React.FC = () => {
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-blue-500" />
               <Input
-                placeholder="Rechercher un parent..."
+                placeholder="Rechercher par nom, prénom ou langue..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-blue-200 dark:border-blue-800 focus:border-blue-500 focus:ring-blue-200"

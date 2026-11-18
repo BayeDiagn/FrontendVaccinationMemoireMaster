@@ -37,7 +37,8 @@ export default function MedecinRouter() {
               {!isIcp && <Route path="prediction-risque" element={<PredictionRisque />} />}
               {!isIcp && <Route path="enfants" element={<Enfant />} />}
               {!isIcp && <Route path="vaccinations" element={<Vaccination />} />}
-              {!isInfirmier && <Route path="vaccins" element={<Vaccin />} />}
+              {/* ★ AJOUTÉ : Infirmier peut aussi accéder aux vaccins */}
+              <Route path="vaccins" element={<Vaccin />} />
               {!isIcp && <Route path="rendez-vous" element={<RendezVous />} />}
               {!isIcp && <Route path="calendrier" element={<Calendrier />} />}
               {!isIcp && !isInfirmier && <Route path="stocks" element={<Stock />} />}

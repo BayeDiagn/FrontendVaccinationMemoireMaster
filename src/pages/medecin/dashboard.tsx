@@ -32,7 +32,7 @@ import PageContainer from "@/components/shared/page-container";
   const statsData = [
     {
       title: "Patients Total",
-      value: "847",
+      value: "48",
       change: "+6.5%",
       changeType: "positive" as const,
       icon: Users,
@@ -40,7 +40,7 @@ import PageContainer from "@/components/shared/page-container";
     },
     {
       title: "Vaccinations ce mois",
-      value: "234",
+      value: "23",
       change: "+8.2%",
       changeType: "positive" as const,
       icon: Syringe,
@@ -48,7 +48,7 @@ import PageContainer from "@/components/shared/page-container";
     },
     {
       title: "Rendez-vous planifiés",
-      value: "156",
+      value: "12",
       change: "-2.1%",
       changeType: "negative" as const,
       icon: Calendar,
@@ -56,21 +56,21 @@ import PageContainer from "@/components/shared/page-container";
     },
     {
       title: "Taux de couverture",
-      value: "94.2%",
+      value: "76.4%",
       change: "+1.8%",
       changeType: "positive" as const,
       icon: TrendingUp,
-      description: "objectif: 95%"
+      description: "objectif: 80%"
     }
   ];
 
   const vaccinationData = [
-    { month: 'Jan', vaccinations: 65, rappels: 28 },
-    { month: 'Fév', vaccinations: 78, rappels: 35 },
-    { month: 'Mar', vaccinations: 90, rappels: 42 },
-    { month: 'Avr', vaccinations: 95, rappels: 38 },
-    { month: 'Mai', vaccinations: 88, rappels: 45 },
-    { month: 'Jun', vaccinations: 110, rappels: 52 }
+    { month: 'Jan', vaccinations: 12, rappels: 5 },
+    { month: 'Fév', vaccinations: 15, rappels: 7 },
+    { month: 'Mar', vaccinations: 18, rappels: 8 },
+    { month: 'Avr', vaccinations: 20, rappels: 7 },
+    { month: 'Mai', vaccinations: 17, rappels: 9 },
+    { month: 'Jun', vaccinations: 23, rappels: 10 }
   ];
 
   const vaccineTypeData = [
@@ -130,6 +130,14 @@ import PageContainer from "@/components/shared/page-container";
     }
   ];
 
+  const parentsData = [
+    { id: 1, prenom: 'Fatou', nom: 'Diop', telephone: '77 123 45 67', nbEnfants: 2, statut: 'Actif' },
+    { id: 2, prenom: 'Mariama', nom: 'Ndiaye', telephone: '76 234 56 78', nbEnfants: 1, statut: 'Actif' },
+    { id: 3, prenom: 'Aïssatou', nom: 'Ba', telephone: '70 345 67 89', nbEnfants: 3, statut: 'Actif' },
+    { id: 4, prenom: 'Rokhaya', nom: 'Fall', telephone: '78 456 78 90', nbEnfants: 2, statut: 'Actif' },
+    { id: 5, prenom: 'Ndéye', nom: 'Sy', telephone: '77 567 89 01', nbEnfants: 1, statut: 'En attente' },
+  ];
+
 
 export default function Dashboard() {
   return (
@@ -137,15 +145,11 @@ export default function Dashboard() {
       title="Tableau de bord" 
       subtitle="Vue d'ensemble de votre activité de vaccination - Suivi des statistiques et des tendances en temps réel"
     >
-      {/* Boutons d'actions principaux */}
-      <div className="flex justify-end space-x-2 mb-8">
+      {/* Bouton actualiser */}
+      <div className="flex justify-end mb-8">
         <Button variant="outline" size="sm" className="border-blue-200 hover:bg-blue-50 text-blue-700 dark:border-blue-800">
           <Activity className="w-4 h-4 mr-2" />
           Actualiser
-        </Button>
-        <Button size="sm" className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white shadow-md">
-          <Calendar className="w-4 h-4 mr-2" />
-          Nouveau RDV
         </Button>
       </div>
 
@@ -182,11 +186,10 @@ export default function Dashboard() {
 
       {/* Contenu principal avec onglets */}
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-1">
+        <TabsList className="grid w-full grid-cols-3 bg-blue-100 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800 rounded-lg p-1">
           <TabsTrigger value="overview" className="text-blue-700 dark:text-blue-300 font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white">Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="vaccinations" className="text-blue-700 dark:text-blue-300 font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white">Vaccinations</TabsTrigger>
-          <TabsTrigger value="patients" className="text-blue-700 dark:text-blue-300 font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white">Patients</TabsTrigger>
-          <TabsTrigger value="analytics" className="text-blue-700 dark:text-blue-300 font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white">Analyses</TabsTrigger>
+          <TabsTrigger value="parents" className="text-blue-700 dark:text-blue-300 font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-600 data-[state=active]:to-blue-500 data-[state=active]:text-white">Parents</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
@@ -311,24 +314,43 @@ export default function Dashboard() {
           </div>
         </TabsContent>
 
-        <TabsContent value="patients" className="space-y-4">
+        <TabsContent value="parents" className="space-y-4">
           <Card className="border-0 shadow-lg dark:bg-slate-900 overflow-hidden">
             <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4">
-              <h3 className="text-white font-black text-lg">Patients récemment enregistrés</h3>
+              <h3 className="text-white font-black text-lg">Parents enregistrés</h3>
+              <p className="text-blue-100 text-sm">Liste des parents suivis dans le centre</p>
             </div>
-            <CardContent className="pt-6">
-              <p className="text-slate-600 dark:text-slate-400 italic">Contenu à développer avec le tableau de données des patients...</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-4">
-          <Card className="border-0 shadow-lg dark:bg-slate-900 overflow-hidden">
-            <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-4">
-              <h3 className="text-white font-black text-lg">Analyses avancées</h3>
-            </div>
-            <CardContent className="pt-6">
-              <p className="text-slate-600 dark:text-slate-400 italic">Contenu à développer avec des analyses approfondies...</p>
+            <CardContent className="pt-4">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-blue-100 dark:border-blue-900/30">
+                      <th className="text-left py-3 px-2 font-bold text-blue-700 dark:text-blue-300">Prénom</th>
+                      <th className="text-left py-3 px-2 font-bold text-blue-700 dark:text-blue-300">Nom</th>
+                      <th className="text-left py-3 px-2 font-bold text-blue-700 dark:text-blue-300">Téléphone</th>
+                      <th className="text-center py-3 px-2 font-bold text-blue-700 dark:text-blue-300">Enfants</th>
+                      <th className="text-center py-3 px-2 font-bold text-blue-700 dark:text-blue-300">Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {parentsData.map((parent) => (
+                      <tr key={parent.id} className="border-b border-blue-50 dark:border-blue-900/20 hover:bg-blue-50/50 dark:hover:bg-blue-900/10 transition-colors">
+                        <td className="py-3 px-2 font-medium text-slate-900 dark:text-white">{parent.prenom}</td>
+                        <td className="py-3 px-2 text-slate-700 dark:text-slate-300">{parent.nom}</td>
+                        <td className="py-3 px-2 text-slate-600 dark:text-slate-400">{parent.telephone}</td>
+                        <td className="py-3 px-2 text-center">
+                          <span className="bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 px-2 py-1 rounded-full text-xs font-bold">{parent.nbEnfants}</span>
+                        </td>
+                        <td className="py-3 px-2 text-center">
+                          <Badge className={parent.statut === 'Actif' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300 border-0 text-xs' : 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 border-0 text-xs'}>
+                            {parent.statut}
+                          </Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

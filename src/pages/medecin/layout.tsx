@@ -44,12 +44,9 @@ export default function MedecinLayout() {
         {
             title: "GESTION",
             items: [
-            ...(isIcp || isInfirmier
-              ? []
-              : [
-                  { icon: Syringe, label: "Vaccins", path: "/medecin/vaccins" },
-                  { icon: Package, label: "Stock vaccins", path: "/medecin/stocks" },
-                ])
+            // ★ AJOUTÉ : Infirmier peut voir Vaccins (mais pas Stock vaccins)
+            ...(!isIcp ? [{ icon: Syringe, label: "Vaccins", path: "/medecin/vaccins" }] : []),
+            ...(!isIcp && !isInfirmier ? [{ icon: Package, label: "Stock vaccins", path: "/medecin/stocks" }] : [])
             ]
         },
         {

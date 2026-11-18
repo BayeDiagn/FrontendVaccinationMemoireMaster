@@ -85,46 +85,51 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
 
-      {/* ── LEFT PANEL — Blue gradient branding ── */}
-      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-900 flex-col justify-between p-10 xl:p-14 overflow-hidden">
-        {/* Decorative blobs */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/4 pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 pointer-events-none" />
-        <div className="absolute top-1/2 right-8 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none" />
+      {/* ── LEFT PANEL — Photo plein écran ── */}
+      <div className="hidden lg:flex lg:w-[45%] xl:w-1/2 relative flex-col justify-between overflow-hidden">
+        {/* Photo de fond plein écran */}
+        <img
+          src="/hero-vaccination.png"
+          alt="Séance de vaccination au Sénégal"
+          className="absolute inset-0 w-full h-full object-cover object-center"
+        />
+        {/* Overlay dégradé pour lisibilité */}
+        <div className="absolute inset-0 bg-gradient-to-t from-blue-950/90 via-blue-900/50 to-blue-800/30" />
 
-        {/* Logo */}
-        <div className="relative flex items-center gap-3">
+        {/* Logo en haut */}
+        <div className="relative z-10 p-10 xl:p-14 flex items-center gap-3">
           <div className="h-12 w-12 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center backdrop-blur-sm">
             <AppLogo className="h-8 w-8 brightness-0 invert" />
           </div>
           <div>
             <div className="text-2xl font-bold text-white tracking-tight">VacciMed</div>
-            <div className="text-sm text-blue-200">Plateforme de Vaccination</div>
+            <div className="text-sm text-blue-200">Vaccination Médicalisée</div>
           </div>
         </div>
 
-        {/* Main content */}
-        <div className="relative space-y-8">
-          <div className="space-y-4">
-            <h2 className="text-3xl xl:text-4xl font-bold text-white leading-tight">
-              La santé publique,
-              <span className="block text-blue-200">notre priorité</span>
+        {/* Contenu en bas sur la photo */}
+        <div className="relative z-10 p-10 xl:p-14 space-y-6">
+          <div className="space-y-3">
+            <h2 className="text-3xl xl:text-4xl font-black text-white leading-tight drop-shadow-lg">
+              Vaccinons aujourd'hui…
             </h2>
-            <p className="text-blue-100 text-base leading-relaxed max-w-md">
-              Gérez vos campagnes de vaccination avec efficacité et sécurité.
-              Une plateforme conçue pour les professionnels de santé.
+            <p className="text-xl text-blue-200 font-semibold">
+              pour un Sénégal en bonne santé
+            </p>
+            <p className="text-blue-100 text-sm leading-relaxed max-w-sm">
+              Plateforme numérique dédiée aux professionnels de santé des postes de santé sénégalais.
             </p>
           </div>
 
-          <div className="space-y-3.5">
+          <div className="space-y-3">
             {[
-              { icon: Heart,    text: "Suivi personnalisé de chaque patient" },
-              { icon: Shield,   text: "Données chiffrées et conformes RGPD" },
-              { icon: BarChart3,text: "Rapports et analyses avancés" },
-              { icon: Users,    text: "Gestion multi-centres en temps réel" },
+              { icon: Heart,    text: "Carnet vaccinal numérique pour chaque enfant" },
+              { icon: Shield,   text: "Données de santé sécurisées" },
+              { icon: BarChart3,text: "Rapports par district sanitaire" },
+              { icon: Users,    text: "Multi-rôles : ICP, Infirmier, Médecin, SF" },
             ].map((item, i) => (
               <div key={i} className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center flex-shrink-0">
+                <div className="h-8 w-8 rounded-lg bg-white/15 border border-white/20 flex items-center justify-center flex-shrink-0 backdrop-blur-sm">
                   <item.icon className="h-4 w-4 text-white" />
                 </div>
                 <span className="text-blue-100 text-sm">{item.text}</span>
@@ -132,21 +137,20 @@ export default function LoginPage() {
             ))}
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-2">
-            <div className="bg-white/10 rounded-xl p-4 border border-white/20 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-white">50 000+</div>
-              <div className="text-xs text-blue-200 mt-1">Patients suivis</div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="text-2xl font-black text-white">10 000+</div>
+              <div className="text-xs text-blue-200 mt-1">Enfants suivis</div>
             </div>
-            <div className="bg-white/10 rounded-xl p-4 border border-white/20 backdrop-blur-sm">
-              <div className="text-2xl font-bold text-white">200+</div>
-              <div className="text-xs text-blue-200 mt-1">Centres partenaires</div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+              <div className="text-2xl font-black text-white">50+</div>
+              <div className="text-xs text-blue-200 mt-1">Postes de santé</div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div className="relative text-blue-300 text-xs">
-          © 2025 VacciMed — Tous droits réservés
+          <div className="text-blue-300 text-xs">
+            © 2025 VacciMed — Vaccination Médicalisée · Sénégal
+          </div>
         </div>
       </div>
 
@@ -303,28 +307,6 @@ export default function LoginPage() {
                 </Button>
               </form>
 
-              <Separator className="my-5 bg-blue-100 dark:bg-blue-900/30" />
-
-              {/* Badge certification */}
-              <div className="text-center mb-4">
-                <Badge className="gap-1.5 text-xs px-3 py-1.5 bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800 hover:bg-blue-100">
-                  <Stethoscope className="h-3 w-3" />
-                  Plateforme Médicale Certifiée
-                </Badge>
-              </div>
-
-              {/* Security hints */}
-              <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-3.5 border border-blue-100 dark:border-blue-900/40 space-y-2">
-                {[
-                  "Données de santé chiffrées et sécurisées",
-                  "Conformité RGPD et normes hospitalières",
-                ].map((text, i) => (
-                  <div key={i} className="flex items-center gap-2 text-xs text-blue-600 dark:text-blue-400">
-                    <CheckCircle2 className="h-3.5 w-3.5 text-blue-500 flex-shrink-0" />
-                    <span>{text}</span>
-                  </div>
-                ))}
-              </div>
             </CardContent>
           </Card>
 

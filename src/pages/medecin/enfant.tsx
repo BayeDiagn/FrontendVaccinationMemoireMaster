@@ -72,7 +72,7 @@ import {
   useUserByEmail
 } from '@/services/user.service';
 import { useAllVaccins } from '@/services/vaccin.service';
-import { useCreateVaccination } from '@/services/vaccination.service';
+import { useCreateVaccination, useAllVaccinations } from '@/services/vaccination.service'; // ★ AJOUTÉ : useAllVaccinations pour filtrer les vaccins déjà reçus
 import { useAppointmentsByEnfant } from '@/services/appointment.service';
 import { CarnetVaccinationModal } from '@/components/modals/carnet-vaccination-modal';
 import { useDecodedToken } from '@/contexts/decoded-token-context';
@@ -556,7 +556,8 @@ export default function EnfantPage() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{stats?.nombreTotalEnfants || enfants?.length || 0}</div>
+              {/* ★ AJOUTÉ : scopedEnfants.length au lieu de stats API pour correspondre aux cards affichées */}
+              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{scopedEnfants.length}</div>
               <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-2 font-medium">Enfants enregistrés</p>
             </CardContent>
           </Card>
@@ -570,22 +571,24 @@ export default function EnfantPage() {
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{stats?.nombreTotalGarcons || 0}</div>
+              {/* ★ AJOUTÉ : compter depuis scopedEnfants pour correspondre aux cards affichées */}
+              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{scopedEnfants.filter(e => e.sexe === 'MASCULIN').length}</div>
               <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-2 font-medium">Sexe masculin</p>
             </CardContent>
           </Card>
 
-          <Card className="group relative bg-gradient-to-br from-pink-50 to-white dark:from-pink-950/30 dark:to-slate-900 border-pink-200 dark:border-pink-800 hover:shadow-xl transition-all duration-300 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-pink-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+          <Card className="group relative bg-gradient-to-br from-blue-50 to-white dark:from-blue-950/30 dark:to-slate-900 border-blue-200 dark:border-blue-800 hover:shadow-xl transition-all duration-300 overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 relative z-10">
-              <CardTitle className="text-sm font-bold text-pink-700 dark:text-pink-400 uppercase tracking-widest">Filles</CardTitle>
-              <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
-                <UserCircle className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+              <CardTitle className="text-sm font-bold text-blue-700 dark:text-blue-400 uppercase tracking-widest">Filles</CardTitle>
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <UserCircle className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               </div>
             </CardHeader>
             <CardContent className="relative z-10">
-              <div className="text-4xl font-black text-pink-700 dark:text-pink-300">{stats?.nombreTotalFilles || 0}</div>
-              <p className="text-xs text-pink-600/70 dark:text-pink-400/70 mt-2 font-medium">Sexe féminin</p>
+              {/* ★ AJOUTÉ : compter depuis scopedEnfants pour correspondre aux cards affichées */}
+              <div className="text-4xl font-black text-blue-700 dark:text-blue-300">{scopedEnfants.filter(e => e.sexe === 'FEMININ').length}</div>
+              <p className="text-xs text-blue-600/70 dark:text-blue-400/70 mt-2 font-medium">Sexe féminin</p>
             </CardContent>
           </Card>
 
@@ -1676,11 +1679,80 @@ function VaccinationModal({
   const { data: appointments, isLoading: loadingAppointments } = useAppointmentsByEnfant(
     enfant?.id || 0
   );
-  
+
   // Filtrer pour ne garder que les rendez-vous non effectués
-  const pendingAppointments = appointments?.filter(
-    (apt: AppointmentDTO) => apt.statut !== StatutRv.EFFECTUE && apt.statut !== StatutRv.ANNULE
-  ) || [];
+  // ★ AJOUTÉ : mémoïsé pour éviter les re-rendus et permettre l'auto-sélection
+  const pendingAppointments = useMemo(() =>
+    appointments?.filter(
+      (apt: AppointmentDTO) => apt.statut !== StatutRv.EFFECTUE && apt.statut !== StatutRv.ANNULE
+    ) || [],
+    [appointments]
+  );
+
+  // ★ AJOUTÉ : auto-sélection automatique si un seul RDV en attente
+  useEffect(() => {
+    if (pendingAppointments.length === 1 && !selectedAppointmentId) {
+      setSelectedAppointmentId(String(pendingAppointments[0].id!));
+    }
+  }, [pendingAppointments, selectedAppointmentId, setSelectedAppointmentId]);
+
+  // ★ AJOUTÉ : récupérer toutes les vaccinations pour filtrer les vaccins déjà reçus
+  const { data: allVaccinations = [] } = useAllVaccinations();
+
+  // ★ AJOUTÉ : noms des vaccins déjà reçus par cet enfant (statut EFFECTUER)
+  const receivedVaccineNames = useMemo(() => {
+    if (!enfant?.id) return new Set<string>();
+    return new Set(
+      allVaccinations
+        .filter(vacc => {
+          const enfantId = vacc.appointment?.enfant?.id ?? vacc.enfant?.id;
+          return enfantId === enfant.id && vacc.statutVaccination === 'EFFECTUER';
+        })
+        .map(vacc => vacc.vaccine?.nom)
+        .filter((n): n is string => !!n)
+    );
+  }, [allVaccinations, enfant?.id]);
+
+  // ★ AJOUTÉ : vaccins disponibles (non encore reçus par l'enfant)
+  const availableVaccins = useMemo(() => {
+    if (!enfant?.id) return vaccins;
+    return vaccins.filter(vaccin => !receivedVaccineNames.has(vaccin.nom));
+  }, [vaccins, receivedVaccineNames, enfant?.id]);
+
+  // ★ AJOUTÉ : auto-sélection du vaccin basée sur le RDV sélectionné (nomVaccinAEffectuer)
+  useEffect(() => {
+    if (!selectedAppointmentId || !availableVaccins.length || selectedVaccinId) return;
+    // Trouver le RDV sélectionné
+    const selectedApt = pendingAppointments.find(apt => String(apt.id) === selectedAppointmentId);
+    if (!selectedApt?.nomVaccinAEffectuer) return;
+    // Chercher le vaccin correspondant dans les vaccins disponibles
+    const matchingVaccin = availableVaccins.find(v => v.nom === selectedApt.nomVaccinAEffectuer);
+    if (matchingVaccin?.id) {
+      setSelectedVaccinId(String(matchingVaccin.id));
+    }
+  }, [selectedAppointmentId, availableVaccins, pendingAppointments, selectedVaccinId, setSelectedVaccinId]);
+
+  // ★ AJOUTÉ : vaccins triés — le vaccin recommandé par le RDV apparaît en premier dans le dropdown
+  const sortedAvailableVaccins = useMemo(() => {
+    if (!selectedAppointmentId) return availableVaccins;
+    const apt = pendingAppointments.find(a => String(a.id) === selectedAppointmentId);
+    if (!apt?.nomVaccinAEffectuer) return availableVaccins;
+    const recommended = apt.nomVaccinAEffectuer;
+    return [...availableVaccins].sort((a, b) => {
+      if (a.nom === recommended) return -1;
+      if (b.nom === recommended) return 1;
+      return 0;
+    });
+  }, [availableVaccins, selectedAppointmentId, pendingAppointments]);
+
+  // ★ AJOUTÉ : vaccin auto-sélectionné — pour afficher la carte verte au lieu du dropdown
+  const autoSelectedVaccin = useMemo(() => {
+    if (!selectedAppointmentId || !selectedVaccinId) return null;
+    const apt = pendingAppointments.find(a => String(a.id) === selectedAppointmentId);
+    if (!apt?.nomVaccinAEffectuer) return null;
+    const v = availableVaccins.find(v => String(v.id) === selectedVaccinId && v.nom === apt.nomVaccinAEffectuer);
+    return v || null;
+  }, [selectedAppointmentId, selectedVaccinId, pendingAppointments, availableVaccins]);
 
   return (
     <BaseModal
@@ -1735,7 +1807,26 @@ function VaccinationModal({
                 Aucun rendez-vous en attente pour cet enfant. Veuillez d'abord créer un rendez-vous.
               </AlertDescription>
             </Alert>
+          // ★ AJOUTÉ : 1 seul RDV → affichage automatique sans dropdown (médecin n'a pas besoin de choisir)
+          ) : pendingAppointments.length === 1 ? (
+            <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-3">
+                <Calendar className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-semibold text-green-800 dark:text-green-200 text-sm">
+                    RDV du {pendingAppointments[0].date ? new Date(pendingAppointments[0].date).toLocaleDateString('fr-FR') : 'Date non définie'}
+                  </p>
+                  {pendingAppointments[0].nomVaccinAEffectuer && (
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Vaccin prévu : {pendingAppointments[0].nomVaccinAEffectuer}
+                    </p>
+                  )}
+                  <p className="text-xs text-green-500 mt-1">✓ Rendez-vous sélectionné automatiquement</p>
+                </div>
+              </div>
+            </div>
           ) : (
+            // ★ CONSERVER : dropdown original pour les cas avec plusieurs RDV
             <Select value={selectedAppointmentId} onValueChange={setSelectedAppointmentId}>
               <SelectTrigger id="appointment-select" className="w-full border-blue-200 dark:border-blue-800">
                 <SelectValue placeholder="Choisir un rendez-vous..." />
@@ -1766,21 +1857,77 @@ function VaccinationModal({
           <Label htmlFor="vaccin-select" className="text-base font-semibold text-blue-700">
             Vaccin <span className="text-red-500">*</span>
           </Label>
-          <Select value={selectedVaccinId} onValueChange={setSelectedVaccinId}>
-            <SelectTrigger id="vaccin-select" className="w-full border-blue-200 dark:border-blue-800">
-              <SelectValue placeholder="Choisir un vaccin..." />
-            </SelectTrigger>
-            <SelectContent>
-              {vaccins?.filter((v: VaccinDTO) => v.id !== null).map((vaccin: VaccinDTO) => (
-                <SelectItem key={vaccin.id!} value={String(vaccin.id!)}>
-                  <span className="font-medium">{vaccin.nom}</span>
-                  {vaccin.fabricant && (
-                    <span className="text-muted-foreground text-xs ml-2">({vaccin.fabricant})</span>
+          {/* ★ AJOUTÉ : message si l'enfant a déjà reçu tous les vaccins disponibles */}
+          {availableVaccins.length === 0 && enfant?.id ? (
+            <div className="p-3 bg-red-50 dark:bg-red-950/20 rounded-lg border border-red-200 dark:border-red-800">
+              <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                ⚠️ Cet enfant a déjà reçu tous les vaccins disponibles.
+              </p>
+            </div>
+          // ★ AJOUTÉ : vaccin connu via RDV → carte verte, pas de dropdown à remplir
+          ) : autoSelectedVaccin ? (
+            <div className="p-4 bg-green-50 dark:bg-green-950/20 rounded-lg border border-green-200 dark:border-green-800">
+              <div className="flex items-center gap-3">
+                <Syringe className="h-5 w-5 text-green-600 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-semibold text-green-800 dark:text-green-200 text-sm">
+                    {autoSelectedVaccin.nom}
+                  </p>
+                  {autoSelectedVaccin.fabricant && (
+                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                      Fabricant : {autoSelectedVaccin.fabricant}
+                    </p>
                   )}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                  <p className="text-xs text-green-500 mt-1">✓ Vaccin sélectionné automatiquement</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            // ★ CONSERVER : dropdown si le vaccin n'est pas déterminable depuis le RDV
+            <Select value={selectedVaccinId} onValueChange={setSelectedVaccinId}>
+              <SelectTrigger id="vaccin-select" className="w-full border-blue-200 dark:border-blue-800">
+                <SelectValue placeholder="Choisir un vaccin..." />
+              </SelectTrigger>
+              <SelectContent>
+                {/* ★ AJOUTÉ : vaccin recommandé en premier, les autres grisés (seulement si le recommandé est dans la liste) */}
+                {(() => {
+                  // ★ AJOUTÉ : trouver le nom du vaccin recommandé par le RDV sélectionné
+                  const apt = selectedAppointmentId
+                    ? pendingAppointments.find(a => String(a.id) === selectedAppointmentId)
+                    : null;
+                  const recommendedName = apt?.nomVaccinAEffectuer;
+                  // ★ AJOUTÉ : on ne désactive les autres QUE si le vaccin recommandé est bien présent dans la liste
+                  const recommendedExists = !!recommendedName &&
+                    sortedAvailableVaccins.some(v => v.nom === recommendedName);
+
+                  return sortedAvailableVaccins.filter((v: VaccinDTO) => v.id !== null).map((vaccin: VaccinDTO) => {
+                    const isRecommended = vaccin.nom === recommendedName;
+                    // ★ AJOUTÉ : désactiver seulement si un vaccin recommandé existe dans la liste ET ce n'est pas lui
+                    const isDisabled = recommendedExists && !isRecommended;
+
+                    return (
+                      <SelectItem
+                        key={vaccin.id!}
+                        value={String(vaccin.id!)}
+                        disabled={isDisabled}
+                        className={isDisabled ? 'opacity-40 cursor-not-allowed' : ''}
+                      >
+                        <span className="font-medium">{vaccin.nom}</span>
+                        {vaccin.fabricant && (
+                          <span className="text-muted-foreground text-xs ml-2">({vaccin.fabricant})</span>
+                        )}
+                        {/* ★ AJOUTÉ : badge vert sur le vaccin recommandé */}
+                        {isRecommended && (
+                          <span className="text-green-600 text-xs ml-2 font-semibold">✓ Recommandé</span>
+                        )}
+                      </SelectItem>
+                    );
+                  });
+                })()}
+              </SelectContent>
+            </Select>
+          )}
+          {/* ★ CONSERVER : message original si aucun vaccin dans le système */}
           {(!vaccins || vaccins.length === 0) && (
             <p className="text-sm text-amber-600">
               Aucun vaccin disponible. Veuillez d'abord ajouter des vaccins dans la section Vaccins.
@@ -1809,7 +1956,7 @@ function VaccinationModal({
           </Button>
           <Button 
             onClick={onConfirm}
-            disabled={!selectedVaccinId || !selectedAppointmentId || isPending || pendingAppointments.length === 0}
+            disabled={!selectedVaccinId || !selectedAppointmentId || isPending || pendingAppointments.length === 0 || availableVaccins.length === 0} // ★ AJOUTÉ : désactivé si tous vaccins reçus
             className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
           >
             {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

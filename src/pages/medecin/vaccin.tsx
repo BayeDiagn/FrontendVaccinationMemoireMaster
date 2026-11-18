@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // ★ AJOUTÉ useMemo
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,44 +93,63 @@ interface VaccinCardProps {
   onDelete: (vaccin: VaccinDTO) => void;
 }
 
+// ★ NOUVEAUTÉ : Carte redessinée — gradient par type, initiales, barre d'actions en bas
 function VaccinCard({ vaccin, onView, onEdit, onDelete }: VaccinCardProps) {
+  const isExpired = vaccin.dateExpiration ? isBefore(parseISO(vaccin.dateExpiration), new Date()) : false;
+  const expiringSoon = !isExpired && vaccin.dateExpiration
+    ? isBefore(parseISO(vaccin.dateExpiration), addMonths(new Date(), 3))
+    : false;
+
+  const gradient = 'from-blue-600 to-blue-500'; // couleur bleue fixe comme avant
+
+  const initials = vaccin.nom
+    ? vaccin.nom.split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase()
+    : '?';
+
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white dark:bg-slate-900">
-      {/* Header bleu */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-3">
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2 flex-1 min-w-0">
-            <div className="bg-white/20 p-2 rounded-lg flex-shrink-0">
-              <Syringe className="h-4 w-4 text-white" />
-            </div>
-            <div className="flex-1 min-w-0 text-white">
-              <p className="font-bold text-sm leading-tight truncate">{vaccin.nom}</p>
-              <p className="text-xs text-white/90 truncate">{vaccin.fabricant || 'Fabricant non spécifié'}</p>
-            </div>
+    <Card className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-0 shadow-md flex flex-col">
+      {/* En-tête coloré par type de vaccin */}
+      <div className={`bg-gradient-to-br ${gradient} px-5 py-5 relative`}>
+        {isExpired && (
+          <span className="absolute top-3 right-3 bg-black/30 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            Expiré
+          </span>
+        )}
+        {expiringSoon && !isExpired && (
+          <span className="absolute top-3 right-3 bg-black/20 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+            Expire bientôt
+          </span>
+        )}
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-xl bg-white/25 flex items-center justify-center border border-white/30 flex-shrink-0 shadow-inner">
+            <span className="text-white font-black text-base">{initials}</span>
           </div>
-          
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-white text-sm leading-snug truncate drop-shadow">{vaccin.nom}</p>
+            <p className="text-white/75 text-xs truncate mt-0.5">{vaccin.fabricant || 'Fabricant N/A'}</p>
+          </div>
           <div className="flex items-center gap-0.5 flex-shrink-0">
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-6 w-6" onClick={() => onView(vaccin)}>
-                    <Eye className="h-3 w-3" />
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-7 w-7" onClick={() => onView(vaccin)}>
+                    <Eye className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Voir détails</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-6 w-6" onClick={() => onEdit(vaccin)}>
-                    <Edit className="h-3 w-3" />
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-7 w-7" onClick={() => onEdit(vaccin)}>
+                    <Edit className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Modifier</TooltipContent>
               </Tooltip>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-6 w-6" onClick={() => onDelete(vaccin)}>
-                    <Trash2 className="h-3 w-3" />
+                  <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 h-7 w-7" onClick={() => onDelete(vaccin)}>
+                    <Trash2 className="h-3.5 w-3.5" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Supprimer</TooltipContent>
@@ -140,51 +159,51 @@ function VaccinCard({ vaccin, onView, onEdit, onDelete }: VaccinCardProps) {
         </div>
       </div>
 
-      <CardContent className="p-3">
-        <div className="flex flex-wrap items-start gap-2">
-          {/* Type */}
-          <div className="flex items-center gap-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
-            <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Type:</span>
-            <span className="text-xs text-blue-900 dark:text-blue-100">{TypeVaccinLabels[vaccin.typeVaccin] || vaccin.typeVaccin}</span>
-          </div>
-
-          {/* Période */}
+      <CardContent className="p-4 flex-1 space-y-3">
+        {/* Badges type + période */}
+        <div className="flex flex-wrap gap-1.5">
+          <Badge variant="outline" className="text-[11px]">
+            {TypeVaccinLabels[vaccin.typeVaccin] || vaccin.typeVaccin}
+          </Badge>
           {vaccin.periode && (
-            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
-              <Clock className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Période:</span>
-              <span className="text-xs text-blue-900 dark:text-blue-100">{PeriodeVaccinationLabels[vaccin.periode] || vaccin.periode}</span>
-            </div>
+            <Badge variant="secondary" className="text-[11px]">
+              <Clock className="h-2.5 w-2.5 mr-1" />
+              {PeriodeVaccinationLabels[vaccin.periode] || vaccin.periode}
+            </Badge>
           )}
+        </div>
 
-          {/* N° Lot */}
-          {vaccin.numeroLot && (
-            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
-              <Package className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Lot:</span>
-              <span className="text-xs text-blue-900 dark:text-blue-100 truncate max-w-xs">{vaccin.numeroLot}</span>
-            </div>
-          )}
-
-          {/* Administration */}
+        {/* Grille infos clés */}
+        <div className="grid grid-cols-2 gap-2">
           {vaccin.modeAdministration && (
-            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
-              <Activity className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Admin:</span>
-              <span className="text-xs text-blue-900 dark:text-blue-100">{ModeAdministrationLabels[vaccin.modeAdministration] || vaccin.modeAdministration}</span>
+            <div className="bg-muted/60 rounded-lg p-2">
+              <p className="text-[10px] text-muted-foreground leading-none mb-1">Administration</p>
+              <p className="font-semibold text-xs leading-tight">{ModeAdministrationLabels[vaccin.modeAdministration]}</p>
             </div>
           )}
-
-          {/* Température */}
+          {vaccin.dosesRequises && (
+            <div className="bg-muted/60 rounded-lg p-2">
+              <p className="text-[10px] text-muted-foreground leading-none mb-1">Doses requises</p>
+              <p className="font-semibold text-xs">{vaccin.dosesRequises} dose{vaccin.dosesRequises > 1 ? 's' : ''}</p>
+            </div>
+          )}
           {vaccin.temperatureConservation && (
-            <div className="flex items-center gap-1.5 px-2 py-1.5 bg-blue-50 dark:bg-blue-950/20 rounded-md border border-blue-200 dark:border-blue-800">
-              <Thermometer className="h-3 w-3 text-blue-600 dark:text-blue-400" />
-              <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">Temp:</span>
-              <span className="text-xs text-blue-900 dark:text-blue-100">{vaccin.temperatureConservation}</span>
+            <div className="bg-blue-50 dark:bg-blue-950/30 rounded-lg p-2">
+              <p className="text-[10px] text-muted-foreground leading-none mb-1">Conservation</p>
+              <p className="font-semibold text-xs text-blue-700 dark:text-blue-300">{vaccin.temperatureConservation}</p>
+            </div>
+          )}
+          {vaccin.dateExpiration && (
+            <div className={`rounded-lg p-2 ${isExpired ? 'bg-red-50 dark:bg-red-950/20' : expiringSoon ? 'bg-orange-50 dark:bg-orange-950/20' : 'bg-green-50 dark:bg-green-950/20'}`}>
+              <p className="text-[10px] text-muted-foreground leading-none mb-1">Expiration</p>
+              <p className={`font-semibold text-xs ${isExpired ? 'text-red-600' : expiringSoon ? 'text-orange-600' : 'text-green-600'}`}>
+                {format(parseISO(vaccin.dateExpiration), 'MM/yyyy')}
+              </p>
             </div>
           )}
         </div>
       </CardContent>
+
     </Card>
   );
 }
@@ -639,7 +658,7 @@ export default function VaccinPage() {
 
   // Filtrage
   const filteredVaccins = (vaccins || []).filter(vaccin => {
-    const matchesSearch = 
+    const matchesSearch =
       vaccin.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaccin.fabricant?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vaccin.numeroLot?.toLowerCase().includes(searchTerm.toLowerCase());
@@ -647,10 +666,21 @@ export default function VaccinPage() {
     return matchesSearch && matchesType;
   });
 
+  // ★ AJOUTÉ : Dédupliquer par nom — un seul vaccin par nom unique
+  const deduplicatedVaccins = useMemo(() => {
+    const seen = new Set<string>();
+    return filteredVaccins.filter(v => {
+      const key = (v.nom || '').toLowerCase().trim();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [filteredVaccins]);
+
   // Pagination
-  const totalPages = Math.ceil(filteredVaccins.length / itemsPerPage);
+  const totalPages = Math.ceil(deduplicatedVaccins.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const paginatedVaccins = filteredVaccins.slice(startIndex, startIndex + itemsPerPage);
+  const paginatedVaccins = deduplicatedVaccins.slice(startIndex, startIndex + itemsPerPage);
 
   // Stats
   const stats = {

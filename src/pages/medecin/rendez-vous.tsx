@@ -15,8 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { 
-  Plus, 
+import {
+  Plus,
   AlertCircle,
   Loader2,
   Calendar,
@@ -24,6 +24,8 @@ import {
   Clock,
   CheckCircle2,
   RefreshCw,
+  X,       // ★ AJOUTÉ : bouton effacer filtres
+  Syringe, // ★ AJOUTÉ : icône vaccin dans le preview
 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';
@@ -42,14 +44,6 @@ import { StatutRvLabels, StatutRvColors, type StatutRvEnum } from '@/types/appoi
 import { useDecodedToken } from '@/contexts/decoded-token-context';
 import { useUserByEmail } from '@/services/user.service';
 
-function StatutBadge({ statut }: { statut: StatutRvEnum }) {
-  const colors = StatutRvColors[statut] || StatutRvColors.EN_ATTENTE;
-  return (
-    <span className={`px-3 py-1 rounded-full text-sm font-medium border ${colors.bg} ${colors.text} ${colors.border}`}>
-      {StatutRvLabels[statut]}
-    </span>
-  );
-}
 
 interface RendezVousFormProps {
   selectedEnfantId: number;
@@ -59,15 +53,36 @@ interface RendezVousFormProps {
   isLoading?: boolean;
 }
 
-function RendezVousForm({ 
+function RendezVousForm({
   selectedEnfantId,
   onEnfantChange,
-  onSubmit, 
-  onCancel, 
-  isLoading, 
+  onSubmit,
+  onCancel,
+  isLoading,
 }: RendezVousFormProps) {
   const { data: enfants = [], isLoading: loadingEnfants } = useAllEnfants();
   const { data: vaccins = [], isLoading: loadingVaccins } = useAllVaccins();
+  const { data: allVaccinations = [] } = useAllVaccinations();
+
+  // Noms des vaccins déjà effectués pour l'enfant sélectionné
+  const receivedVaccineNames = useMemo(() => {
+    if (!selectedEnfantId) return new Set<string>();
+    return new Set(
+      allVaccinations
+        .filter(vacc => {
+          const enfantId = vacc.appointment?.enfant?.id ?? vacc.enfant?.id;
+          return enfantId === selectedEnfantId && vacc.statutVaccination === 'EFFECTUER';
+        })
+        .map(vacc => vacc.vaccine?.nom)
+        .filter((n): n is string => !!n)
+    );
+  }, [allVaccinations, selectedEnfantId]);
+
+  // Vaccins disponibles = ceux que l'enfant n'a pas encore reçus
+  const availableVaccins = useMemo(() => {
+    if (!selectedEnfantId) return vaccins;
+    return vaccins.filter(vaccin => !receivedVaccineNames.has(vaccin.nom));
+  }, [vaccins, receivedVaccineNames, selectedEnfantId]);
 
   const [formData, setFormData] = useState<SaveAppointmentDTO>({
     nomVaccinAEffectuer: '',
@@ -126,16 +141,20 @@ function RendezVousForm({
         <Label className="text-blue-700 dark:text-blue-300 font-semibold">Vaccin à effectuer *</Label>
         {loadingVaccins ? (
           <Skeleton className="h-10 w-full" />
+        ) : availableVaccins.length === 0 && selectedEnfantId ? (
+          <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800 text-sm text-green-700 dark:text-green-300">
+            ✅ Cet enfant a déjà reçu tous les vaccins disponibles.
+          </div>
         ) : (
-          <Select 
-            value={formData.nomVaccinAEffectuer} 
+          <Select
+            value={formData.nomVaccinAEffectuer}
             onValueChange={(v) => setFormData(prev => ({ ...prev, nomVaccinAEffectuer: v }))}
           >
             <SelectTrigger className="border-blue-200 focus:border-blue-500 focus:ring-blue-300 dark:border-blue-800 dark:bg-slate-800 dark:text-white">
-              <SelectValue placeholder="Sélectionner un vaccin" />
+              <SelectValue placeholder={selectedEnfantId ? "Sélectionner un vaccin restant" : "Sélectionner d'abord un enfant"} />
             </SelectTrigger>
             <SelectContent>
-              {vaccins.map((vaccin) => (
+              {availableVaccins.map((vaccin) => (
                 <SelectItem key={vaccin.id} value={vaccin.nom}>
                   {vaccin.nom}
                 </SelectItem>
@@ -173,6 +192,7 @@ function RendezVousForm({
 export default function RendezVous() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statutFilter, setStatutFilter] = useState<string>('tous');
+  const [dateFilter, setDateFilter] = useState<string>(''); // ★ AJOUTÉ : filtre par date
   const [selectedEnfantId, setSelectedEnfantId] = useState<number>(0);
   const [selectedChildForCarnet, setSelectedChildForCarnet] = useState<EnfantDTO | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -236,15 +256,33 @@ export default function RendezVous() {
     return acc;
   }, [] as Array<{ child: EnfantDTO; appointments: AppointmentDTO[] }>);
 
+  // ★ AJOUTÉ : constante today pour les boutons rapides
+  const todayStr = format(new Date(), 'yyyy-MM-dd');
+
   // Filter
   const filteredChildren = appointmentsByChild.filter(({ child, appointments }) => {
-    const matchSearch = searchTerm === '' || 
-      child.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      child.nom?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchStatut = statutFilter === 'tous' || 
+    const searchLower = searchTerm.toLowerCase();
+    // ★ AJOUTÉ : recherche aussi par nom de vaccin
+    const matchSearch = searchTerm === '' ||
+      child.prenom?.toLowerCase().includes(searchLower) ||
+      child.nom?.toLowerCase().includes(searchLower) ||
+      appointments.some(rdv => rdv.nomVaccinAEffectuer?.toLowerCase().includes(searchLower));
+    const matchStatut = statutFilter === 'tous' ||
       appointments.some(rdv => rdv.statut === statutFilter as StatutRvEnum);
-    return matchSearch && matchStatut;
+    // ★ AJOUTÉ : filtre par date exacte
+    const matchDate = dateFilter === '' || appointments.some(rdv => rdv.date === dateFilter);
+    return matchSearch && matchStatut && matchDate;
   });
+
+  // ★ AJOUTÉ : vrai si au moins un filtre est actif (pour afficher le bouton effacer)
+  const hasActiveFilters = searchTerm !== '' || statutFilter !== 'tous' || dateFilter !== '';
+
+  // ★ AJOUTÉ : effacer tous les filtres d'un coup
+  const clearAllFilters = () => {
+    setSearchTerm('');
+    setStatutFilter('tous');
+    setDateFilter('');
+  };
 
   // Stats
   const stats = {
@@ -285,6 +323,12 @@ export default function RendezVous() {
   const handleCreateFromCarnet = (enfant: EnfantDTO) => {
     setSelectedEnfantId(enfant.id || 0);
     setCarnetModalOpen(false);
+    setCreateModalOpen(true);
+  };
+
+  // Nouveau RDV depuis une card enfant — l'enfant est pré-sélectionné automatiquement
+  const handleCardNewRdv = (child: EnfantDTO) => {
+    setSelectedEnfantId(child.id || 0);
     setCreateModalOpen(true);
   };
 
@@ -371,38 +415,83 @@ export default function RendezVous() {
       {/* Toolbar */}
       <Card className="mb-6 border-0 dark:bg-slate-900 shadow-md">
         <CardContent className="p-5">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-1 gap-4 w-full lg:w-auto">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
+          <div className="flex flex-col gap-4">
+            {/* Ligne 1 : recherche + statut */}
+            <div className="flex flex-col lg:flex-row gap-3 items-center justify-between">
+              <div className="flex flex-1 gap-3 w-full lg:w-auto">
+                {/* ★ AJOUTÉ : recherche par enfant OU par vaccin */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400" />
+                  <Input
+                    placeholder="Rechercher par enfant ou vaccin..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 border-blue-200 focus:border-blue-500 focus:ring-blue-300 dark:border-blue-800 dark:bg-slate-800 dark:text-white"
+                  />
+                </div>
+                <Select value={statutFilter} onValueChange={setStatutFilter}>
+                  <SelectTrigger className="w-48 border-blue-200 focus:border-blue-500 focus:ring-blue-300 dark:border-blue-800 dark:bg-slate-800 dark:text-white">
+                    <SelectValue placeholder="Statut" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tous">Tous les statuts</SelectItem>
+                    {Object.entries(StatutRvLabels).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>{label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={() => refetch()} className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20">
+                  <RefreshCw className="h-4 w-4" />
+                </Button>
+                <Button onClick={() => setCreateModalOpen(true)} className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold shadow-md">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau RDV
+                </Button>
+              </div>
+            </div>
+
+            {/* ★ AJOUTÉ : Ligne 2 — filtre par date */}
+            <div className="flex flex-wrap gap-3 items-center">
+              <div className="relative">
+                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-400 pointer-events-none" />
                 <Input
-                  placeholder="Rechercher un enfant..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 border-blue-200 focus:border-blue-500 focus:ring-blue-300 dark:border-blue-800 dark:bg-slate-800 dark:text-white"
+                  type="date"
+                  value={dateFilter}
+                  onChange={(e) => setDateFilter(e.target.value)}
+                  className="pl-10 w-44 border-blue-200 focus:border-blue-500 dark:border-blue-800 dark:bg-slate-800 dark:text-white"
                 />
               </div>
-              <Select value={statutFilter} onValueChange={setStatutFilter}>
-                <SelectTrigger className="w-48 border-blue-200 focus:border-blue-500 focus:ring-blue-300 dark:border-blue-800 dark:bg-slate-800 dark:text-white">
-                  <SelectValue placeholder="Statut" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="tous">Tous les statuts</SelectItem>
-                  {Object.entries(StatutRvLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => refetch()} className="border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20">
-                <RefreshCw className="h-4 w-4" />
+              {/* ★ AJOUTÉ : bouton Aujourd'hui — sélectionne/désélectionne la date du jour */}
+              <Button
+                variant={dateFilter === todayStr ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setDateFilter(dateFilter === todayStr ? '' : todayStr)}
+                className={dateFilter === todayStr
+                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  : 'border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400'}
+              >
+                <Calendar className="h-4 w-4 mr-1" />
+                Aujourd'hui
               </Button>
-              <Button onClick={() => setCreateModalOpen(true)} className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold shadow-md">
-                <Plus className="h-4 w-4 mr-2" />
-                Nouveau RDV
-              </Button>
+              {/* ★ AJOUTÉ : compteur de résultats */}
+              <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">
+                {filteredChildren.length} enfant{filteredChildren.length > 1 ? 's' : ''}
+              </span>
+              {/* ★ AJOUTÉ : bouton effacer tous les filtres */}
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearAllFilters}
+                  className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/20 ml-auto"
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Effacer les filtres
+                </Button>
+              )}
             </div>
           </div>
         </CardContent>
@@ -415,9 +504,14 @@ export default function RendezVous() {
             <Calendar className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">Aucun rendez-vous</h3>
             <p className="text-muted-foreground mb-4">
-              {searchTerm || statutFilter !== 'tous' 
-                ? 'Aucun rendez-vous ne correspond à vos critères.'
-                : isInfirmier
+              {/* ★ AJOUTÉ : message adapté selon le filtre actif */}
+              {dateFilter && dateFilter === todayStr
+                ? "Aucun rendez-vous prévu aujourd'hui."
+                : dateFilter
+                  ? `Aucun rendez-vous pour le ${format(new Date(dateFilter + 'T00:00:00'), 'dd MMMM yyyy', { locale: fr })}.`
+                  : hasActiveFilters
+                    ? 'Aucun rendez-vous ne correspond à vos critères.'
+                    : isInfirmier
                   ? 'Aucun rendez-vous créé par votre compte pour le moment.'
                   : 'Commencez par créer un nouveau rendez-vous.'}
             </p>
@@ -448,72 +542,63 @@ export default function RendezVous() {
                 </div>
               </div>
               
-              <CardContent className="p-6 space-y-5">
-                {/* Stats Bar */}
-                <div className="grid grid-cols-3 gap-3">
-                  <div className="bg-gradient-to-br from-orange-50 to-orange-100/50 dark:from-orange-950/30 dark:to-orange-900/30 rounded-lg p-4 border border-orange-100 dark:border-orange-800">
-                    <p className="text-2xl font-bold text-orange-600">
-                      {childAppointments.filter(r => r.statut === 'EN_ATTENTE').length}
-                    </p>
-                    <p className="text-xs font-semibold text-orange-700 uppercase tracking-wide mt-1">En attente</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/30 rounded-lg p-4 border border-emerald-100 dark:border-emerald-800">
-                    <p className="text-2xl font-bold text-emerald-600">
-                      {childAppointments.filter(r => r.statut === 'CONFIRME').length}
-                    </p>
-                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wide mt-1">Confirmés</p>
-                  </div>
-                  <div className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/30 rounded-lg p-4 border border-blue-100 dark:border-blue-800">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {childAppointments.filter(r => r.statut === 'EFFECTUE').length}
-                    </p>
-                    <p className="text-xs font-semibold text-blue-700 uppercase tracking-wide mt-1">Effectués</p>
-                  </div>
-                </div>
-
-                {/* Separator */}
-                <div className="h-px bg-gradient-to-r from-transparent via-blue-200 to-transparent"></div>
-
+              <CardContent className="p-6 space-y-4">
                 {/* Preview appointments */}
                 {childAppointments.length > 0 ? (
                   <div className="space-y-3">
-                    <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Prochains rendez-vous</p>
+                    <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">Prochain rendez-vous</p>
                     <div className="space-y-2">
-                      {childAppointments.slice(0, 2).map((rdv) => (
-                        <div key={rdv.id} className="flex items-start justify-between gap-3 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-800">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{rdv.nomVaccinAEffectuer}</p>
-                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                              {rdv.date && format(parseISO(rdv.date), 'dd MMM yyyy', { locale: fr })}
-                            </p>
-                          </div>
-                          <StatutBadge statut={rdv.statut as StatutRvEnum} />
+                      {/* ★ AJOUTÉ : tri par date croissante — le RDV le plus proche en premier */}
+                      {[...childAppointments]
+                        .sort((a, b) => (a.date && b.date ? a.date.localeCompare(b.date) : 0))
+                        .slice(0, 1)
+                        .map((rdv) => (
+                        <div key={rdv.id} className="p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                          {rdv.nomVaccinAEffectuer && (
+                            <div className="flex items-center gap-2 mb-1">
+                              <Syringe className="h-3 w-3 text-blue-500 flex-shrink-0" />
+                              <p className="font-semibold text-gray-900 dark:text-white text-sm">{rdv.nomVaccinAEffectuer}</p>
+                            </div>
+                          )}
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            {rdv.date && format(parseISO(rdv.date), 'dd MMM yyyy', { locale: fr })}
+                          </p>
                         </div>
                       ))}
                     </div>
-                    {childAppointments.length > 2 && (
-                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium pt-1">
-                        +{childAppointments.length - 2} autres
+                    {childAppointments.length > 1 && (
+                      <p className="text-xs text-blue-600 dark:text-blue-400 font-medium">
+                        +{childAppointments.length - 1} autres
                       </p>
                     )}
                   </div>
                 ) : (
-                  <div className="text-center py-4">
+                  <div className="text-center py-2">
                     <p className="text-sm text-muted-foreground">Aucun rendez-vous pour le moment</p>
                   </div>
                 )}
 
-                {/* Button */}
-                <Button 
-                  className="w-full mt-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold shadow-md hover:shadow-lg transition-all"
-                  onClick={() => {
-                    setSelectedChildForCarnet(child);
-                    setCarnetModalOpen(true);
-                  }}
-                >
-                  <Calendar className="h-4 w-4 mr-2" />
-                  Voir les rendez-vous
-                </Button>
+                {/* Boutons */}
+                <div className="flex gap-2 pt-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1 border-blue-200 text-blue-600 hover:bg-blue-50 dark:border-blue-800 dark:text-blue-400 dark:hover:bg-blue-900/20 font-semibold"
+                    onClick={() => {
+                      setSelectedChildForCarnet(child);
+                      setCarnetModalOpen(true);
+                    }}
+                  >
+                    <Calendar className="h-4 w-4 mr-2" />
+                    Voir les RDV
+                  </Button>
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-semibold shadow-md"
+                    onClick={() => handleCardNewRdv(child)}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nouveau RDV
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
